@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Categories — Classनोट्स U.P.S.I.F</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .cat-hero {
+      padding: 60px 48px 30px;
+      background: linear-gradient(90deg, rgba(244,236,255,0.35), rgba(234,247,255,0.35));
+      text-align: left;
+    }
+    .cat-hero h1 {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+    .cat-hero p {
+      color: #6b7280;
+      max-width: 520px;
+    }
+    .category-grid {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .cat-card {
+      padding: 20px;
+      border-radius: 16px;
+      background: #f3f4f6;
+      font-weight: 700;
+      text-align: left;
+      box-shadow: 0 8px 20px rgba(10,35,66,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .cat-card span {
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    .cat-card a {
+      font-size: 14px;
+      margin-top: 8px;
+      text-decoration: none;
+      color: #0a2342;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .cat-hero {
+        padding: 40px 20px 20px;
+      }
+      .cat-hero h1 {
+        font-size: 30px;
+      }
+      .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 540px) {
+      .category-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">Classनोट्स U.P.S.I.F</div>
+
+    <button class="mobile-menu-btn">☰</button>
+
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="categories.html">Categories</a>
+      <a href="notes.html">Notes</a>
+      <button class="btn-outline">Contact</button>
+    </nav>
+  </header>
+
+  <section class="cat-hero">
+    <h1>Browse by Category</h1>
+    <p>Choose your course and quickly jump to the most relevant notes, PYQs and syllabus collections.</p>
+
+    <div class="category-grid">
+      <div class="cat-card purple">
+        B.Tech
+        <span>Core subjects, labs, PYQs & more.</span>
+        <a href="notes.html">View notes →</a>
+      </div>
+      <div class="cat-card pink">
+        BSc–MSc
+        <span>Physics, Chemistry, Maths, Life Science.</span>
+        <a href="notes.html">View notes →</a>
+      </div>
+      <div class="cat-card blue">
+        LLB
+        <span>Acts, case laws, bare act short notes.</span>
+        <a href="notes.html">View notes →</a>
+      </div>
+      <div class="cat-card yellow">
+        Mathematics
+        <span>Calculus, algebra, discrete maths & more.</span>
+        <a href="notes.html">View notes →</a>
+      </div>
+      <div class="cat-card soft-yellow">
+        IT & CS
+        <span>Programming, DBMS, OS, CN, DSA.</span>
+        <a href="notes.html">View notes →</a>
+      </div>
+      <div class="cat-card purple">
+        Notes Archive
+        <span>Old papers, previous-sem notes, extras.</span>
+        <a href="notes.html">View notes →</a>
+      </div>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
