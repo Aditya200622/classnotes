@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Your Notes</title>
+  <link rel="stylesheet" href="upload.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">Classनोट्स U.P.S.I.F</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="#">Categories</a>
+      <a href="notes.html">Notes</a>
+      <button class="btn-outline">Contact</button>
+    </nav>
+  </header>
+
+  <section class="upload-section">
+    <h1>Upload Your Notes 🖊️</h1>
+    <p class="subtitle">Share your notes with thousands of students. Fast, easy and free.</p>
+
+    <form class="upload-form">
+      <label>Subject Name</label>
+      <input type="text" placeholder="Enter subject (e.g. Engineering Physics)" required />
+
+      <label>Category</label>
+      <select required>
+        <option value="">Select Category</option>
+        <option>B.Tech</option>
+        <option>BSc–MSc</option>
+        <option>LLB</option>
+        <option>Mathematics</option>
+        <option>IT & CS</option>
+      </select>
+
+      <label>Upload PDF / Images</label>
+      <input type="file" accept="application/pdf,image/*" multiple required />
+
+      <label>Description</label>
+      <textarea placeholder="Short description about these notes..."></textarea>
+
+      <button class="btn-primary" type="submit">Upload Now</button>
+    </form>
+  </section>
+
+</body>
+</html>
