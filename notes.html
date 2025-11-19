@@ -1,118 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>All Notes</title>
 
-  <!-- Supabase Client -->
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
-
   <style>
-    body { font-family: Arial; background:#f5f5f5; margin:0; }
+    body { font-family: Arial, sans-serif; background:#f5f5f5; margin:0; }
+    .navbar { display:flex; justify-content:space-between; padding:15px 25px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    nav a { margin-left:20px; text-decoration:none; font-size:16px; color:#333; }
 
-    .navbar {
-      display:flex; justify-content:space-between; align-items:center;
-      padding:15px 25px; background:white;
-      box-shadow:0 2px 5px rgba(0,0,0,0.1);
-      position:sticky; top:0; z-index:10;
-    }
-    nav a { margin-left:20px; text-decoration:none; color:#333; }
-
-    .container { max-width:1100px; margin:40px auto; padding:20px; }
-
-    h1 { text-align:center; margin-bottom:20px; }
-
-    .notes-grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));
-      gap:20px;
-    }
+    .container { max-width:900px; margin:60px auto; }
+    h1 { text-align:center; margin-bottom:30px; }
 
     .note-card {
-      background:white; padding:20px;
-      border-radius:12px;
-      box-shadow:0 5px 20px rgba(0,0,0,0.07);
-      border-left:6px solid #4c6ef5;
+      background:white; padding:20px; border-radius:12px;
+      box-shadow:0 4px 18px rgba(0,0,0,0.08);
+      margin-bottom:20px;
     }
-
-    .note-card h3 { margin:0; font-size:20px; }
-    .note-card p { margin:8px 0; font-size:14px; color:#444; }
-    .note-card a {
-      display:inline-block; margin-top:10px;
-      background:#4c6ef5; color:white; padding:8px 12px;
-      border-radius:8px; text-decoration:none;
-    }
+    .note-card a { color:#4c6ef5; font-weight:bold; }
+    .meta { color:#555; margin-top:8px; }
   </style>
 </head>
 
 <body>
 
-  <header class="navbar">
-    <div class="logo">Classनोट्स U.P.S.I.F</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="upload.html">Upload Notes</a>
-      <a href="#">Categories</a>
-    </nav>
-  </header>
+<header class="navbar">
+  <div class="logo">Classनोट्स U.P.S.I.F</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="upload.html">Upload Notes</a>
+    <a href="#">Categories</a>
+  </nav>
+</header>
 
-  <div class="container">
-    <h1>All Uploaded Notes 📚</h1>
-
-    <div id="notesContainer">
-      <p>Loading notes...</p>
-    </div>
-  </div>
+<div class="container">
+  <h1>All Uploaded Notes 📚</h1>
+  <p id="loading">Loading notes...</p>
+  <div id="notes"></div>
+</div>
 
 <script>
-// Your project info
-const SUPABASE_URL = "https://xpdtmigeeiucpyrvvsco.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZHRtaWdlZWljdXB5cnZ2c2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NDQzNjEsImV4cCI6MjA3OTEyMDM2MX0.N6vuRtutjFvbDpGutvFiWqLWKi5f2TeffiyLuSIt5Fk";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ⭐ Supabase project details
+const PROJECT_URL = "https://xpdtmigeeiucpyrvvsco.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZHRtaWdlZWljdXB5cnZ2c2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NDQzNjEsImV4cCI6MjA3OTEyMDM2MX0.N6vuRtutjFvbDpGutvFiWqLWKi5f2TeffiyLuSIt5Fk";
+
+// ⭐ Bucket name
+const BUCKET = "public-files";
 
 async function loadNotes() {
-    const container = document.getElementById("notesContainer");
 
-    const { data: files, error } = await supabase
-        .storage
-        .from("public-files")
-        .list("", { limit: 500 });
+    const url = `${PROJECT_URL}/storage/v1/object/list/${BUCKET}`;
 
-    if (error) {
-        container.innerHTML = "<p>Error loading notes ❌</p>";
-        console.error(error);
-        return;
-    }
+    const res = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "apikey": ANON_KEY,
+            "Authorization": `Bearer ${ANON_KEY}`
+        },
+        body: JSON.stringify({
+            prefix: "",
+            limit: 1000,
+            offset: 0
+        })
+    });
 
-    container.innerHTML = "";
+    const data = await res.json();
 
-    files.forEach(file => {
-        if (!file.name.includes("__meta__")) return;
+    document.getElementById("loading").style.display = "none";
 
-        let [fname, metaString] = file.name.split("__meta__");
-        let meta = JSON.parse(decodeURIComponent(metaString));
+    const container = document.getElementById("notes");
 
-        let fileUrl = `${SUPABASE_URL}/storage/v1/object/public/public-files/${file.name}`;
+    data.forEach(file => {
+        const name = file.name;
 
-        container.innerHTML += `
-          <div class="notes-grid">
-            <div class="note-card">
-              <h3>${meta.subject}</h3>
-              <p><b>Category:</b> ${meta.category}</p>
-              <p>${meta.desc}</p>
-              <a href="${fileUrl}" target="_blank">Open / Download</a>
-            </div>
+        if (!name.includes("__meta__")) return;
+
+        const [fileName, metaPart] = name.split("__meta__");
+
+        let meta = {};
+        try {
+            meta = JSON.parse(decodeURIComponent(metaPart));
+        } catch (e) {}
+
+        const fileUrl = `${PROJECT_URL}/storage/v1/object/public/${BUCKET}/${name}`;
+
+        const card = `
+          <div class="note-card">
+              <a href="${fileUrl}" target="_blank">📄 ${meta.subject || "Untitled"}</a>
+              <div class="meta">
+                  <b>Category:</b> ${meta.category || ""}
+                  <br>
+                  <b>Description:</b> ${meta.desc || ""}
+              </div>
           </div>
         `;
+
+        container.innerHTML += card;
     });
 }
 
 loadNotes();
+
 </script>
 
 </body>
 </html>
+
 
 
