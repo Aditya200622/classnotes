@@ -61,7 +61,7 @@
       </select>
 
       <label>Upload PDF / Images</label>
-      <input id="fileInput" type="file" accept="application/pdf,image/*" multiple required />
+      <input id="fileInput" type="file" accept="application/pdf,image/*" required />
 
       <label>Description</label>
       <textarea id="desc" placeholder="Short description..."></textarea>
@@ -73,6 +73,7 @@
     <p id="link"></p>
   </section>
 
+<!-- ⭐ FINAL WORKING SCRIPT WITH METADATA -->
 <script>
 const BUCKET_URL = "https://xpdtmigeeiucpyrvvsco.supabase.co/storage/v1/object/public/public-files/";
 
@@ -91,17 +92,29 @@ async function uploadFile(e) {
 
     document.getElementById("status").innerText = "Uploading...";
 
-    const safeName = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+    // Metadata object
+    const metadata = { subject, category, desc };
+
+    // Encode metadata
+    const metaString = encodeURIComponent(JSON.stringify(metadata));
+
+    // Final file name format
+    const safeName =
+        Date.now() +
+        "_" +
+        file.name.replace(/[^a-zA-Z0-9.]/g, "_") +
+        "__meta__" +
+        metaString;
 
     const uploadUrl = BUCKET_URL + safeName;
 
-    const res = await fetch(uploadUrl, {
+    const response = await fetch(uploadUrl, {
         method: "PUT",
         headers: { "Content-Type": file.type },
         body: file
     });
 
-    if (res.ok) {
+    if (response.ok) {
         document.getElementById("status").innerText = "Upload Successful ✔✔";
 
         document.getElementById("link").innerHTML =
@@ -109,7 +122,6 @@ async function uploadFile(e) {
            <br><b>Subject:</b> ${subject}
            <br><b>Category:</b> ${category}
            <br><b>Description:</b> ${desc}`;
-
     } else {
         document.getElementById("status").innerText = "Upload failed ❌";
     }
@@ -118,3 +130,5 @@ async function uploadFile(e) {
 
 </body>
 </html>
+
+
