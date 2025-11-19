@@ -86,18 +86,15 @@ const BASE_URL = "https://xpdtmigeeiucpyrvvsco.supabase.co/storage/v1/object/pub
 async function loadNotes() {
     let container = document.getElementById("notesContainer");
 
-    const res = await fetch("https://xpdtmigeeiucpyrvvsco.supabase.co/storage/v1/object/list/public-files", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" }
-    });
+    const res = await fetch(
+        "https://xpdtmigeeiucpyrvvsco.supabase.co/storage/v1/object/public/public-files/?prefix="
+    );
 
-    const data = await res.json();
+    const files = await res.json();
 
     container.innerHTML = "";
 
-    let notesList = data;
-
-    notesList.forEach(file => {
+    files.forEach(file => {
         const nameParts = file.name.split("__meta__");
 
         let meta = { subject: "Unknown", category: "Other", desc: "No description" };
@@ -118,8 +115,8 @@ async function loadNotes() {
         `;
     });
 }
-
 loadNotes();
+
 </script>
 
 </body>
