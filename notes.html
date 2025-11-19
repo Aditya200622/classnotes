@@ -42,50 +42,38 @@
 
 <script>
 
-// ⭐ Supabase project details
+// ⭐ REAL PROJECT URL
 const PROJECT_URL = "https://xpdtmigeeicupyrvvsco.supabase.co";
-const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZHRtaWdlZWljdXB5cnZ2c2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NDQzNjEsImV4cCI6MjA3OTEyMDM2MX0.N6vuRtutjFvbDpGutvFiWqLWKi5f2TeffiyLuSIt5Fk";
 
-// ⭐ Bucket name
-const BUCKET = "public-files";
+// ⭐ PUBLIC BUCKET URL (GET version)
+const PUBLIC_BUCKET_URL = `${PROJECT_URL}/storage/v1/object/public/public-files/`;
+
+// ⭐ LIST URL (GET → Works on GitHub)
+const LIST_URL = `${PROJECT_URL}/storage/v1/object/list/public-files`;
 
 async function loadNotes() {
-
-    const url = `${PROJECT_URL}/storage/v1/object/list/${BUCKET}`;
-
-    const res = await fetch(url, {
-        method: "POST",
+    const res = await fetch(LIST_URL, {
+        method: "GET",
         headers: {
-            "Content-Type": "application/json",
-            "apikey": ANON_KEY,
-            "Authorization": `Bearer ${ANON_KEY}`
-        },
-        body: JSON.stringify({
-            prefix: "",
-            limit: 1000,
-            offset: 0
-        })
+            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZHRtaWdlZWljdXB5cnZ2c2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NDQzNjEsImV4cCI6MjA3OTEyMDM2MX0.N6vuRtutjFvbDpGutvFiWqLWKi5f2TeffiyLuSIt5Fk"
+        }
     });
 
     const data = await res.json();
 
     document.getElementById("loading").style.display = "none";
-
     const container = document.getElementById("notes");
 
     data.forEach(file => {
         const name = file.name;
-
         if (!name.includes("__meta__")) return;
 
         const [fileName, metaPart] = name.split("__meta__");
 
         let meta = {};
-        try {
-            meta = JSON.parse(decodeURIComponent(metaPart));
-        } catch (e) {}
+        try { meta = JSON.parse(decodeURIComponent(metaPart)); } catch {}
 
-        const fileUrl = `${PROJECT_URL}/storage/v1/object/public/${BUCKET}/${name}`;
+        const fileUrl = PUBLIC_BUCKET_URL + name;
 
         const card = `
           <div class="note-card">
@@ -97,7 +85,6 @@ async function loadNotes() {
               </div>
           </div>
         `;
-
         container.innerHTML += card;
     });
 }
