@@ -41,56 +41,69 @@
 </div>
 
 <script>
-
-// ⭐ REAL PROJECT URL
 const PROJECT_URL = "https://xpdtmigeeicupyrvvsco.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZHRtaWdlZWljdXB5cnZ2c2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NDQzNjEsImV4cCI6MjA3OTEyMDM2MX0.N6vuRtutjFvbDpGutvFiWqLWKi5f2TeffiyLuSIt5Fk";
 
-// ⭐ PUBLIC BUCKET URL (GET version)
-const PUBLIC_BUCKET_URL = `${PROJECT_URL}/storage/v1/object/public/public-files/`;
-
-// ⭐ LIST URL (GET → Works on GitHub)
-const LIST_URL = `${PROJECT_URL}/storage/v1/object/list/public-files`;
+const BUCKET = "public-files";
 
 async function loadNotes() {
-    const res = await fetch(LIST_URL, {
-        method: "GET",
+
+    const url = `${PROJECT_URL}/storage/v1/object/list/${BUCKET}`;
+
+    const res = await fetch(url, {
+        method: "POST",
         headers: {
-            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZHRtaWdlZWljdXB5cnZ2c2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NDQzNjEsImV4cCI6MjA3OTEyMDM2MX0.N6vuRtutjFvbDpGutvFiWqLWKi5f2TeffiyLuSIt5Fk"
-        }
+            "Content-Type": "application/json",
+            "apikey": ANON_KEY,
+            "Authorization": `Bearer ${ANON_KEY}`
+        },
+        body: JSON.stringify({
+            prefix: "",       // root folder
+        })
     });
 
     const data = await res.json();
 
+    console.log("LIST RESPONSE =", data); // DEBUG
+
     document.getElementById("loading").style.display = "none";
     const container = document.getElementById("notes");
 
+    if (!Array.isArray(data)) {
+        container.innerHTML = "<p>❌ Failed to load notes.</p>";
+        return;
+    }
+
     data.forEach(file => {
         const name = file.name;
+
         if (!name.includes("__meta__")) return;
 
-        const [fileName, metaPart] = name.split("__meta__");
+        const [pure, metaPart] = name.split("__meta__");
 
         let meta = {};
-        try { meta = JSON.parse(decodeURIComponent(metaPart)); } catch {}
+        try {
+            meta = JSON.parse(decodeURIComponent(metaPart));
+        } catch {}
 
-        const fileUrl = PUBLIC_BUCKET_URL + name;
+        const fileUrl = `${PROJECT_URL}/storage/v1/object/public/${BUCKET}/${name}`;
 
         const card = `
-          <div class="note-card">
-              <a href="${fileUrl}" target="_blank">📄 ${meta.subject || "Untitled"}</a>
-              <div class="meta">
-                  <b>Category:</b> ${meta.category || ""}
-                  <br>
-                  <b>Description:</b> ${meta.desc || ""}
-              </div>
-          </div>
+            <div class="note-card">
+                <a href="${fileUrl}" target="_blank">📄 ${meta.subject || "Untitled"}</a>
+                <div class="meta">
+                    <b>Category:</b> ${meta.category || ""}
+                    <br>
+                    <b>Description:</b> ${meta.desc || ""}
+                </div>
+            </div>
         `;
+
         container.innerHTML += card;
     });
+
 }
-
 loadNotes();
-
 </script>
 
 </body>
