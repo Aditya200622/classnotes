@@ -75,7 +75,7 @@
 
 <!-- ⭐ FINAL WORKING SCRIPT WITH METADATA -->
 <script>
-const BUCKET_URL = "https://xpdtmigeeiucpyrvvsco.supabase.co/storage/v1/object/public/public-files/";
+const BUCKET_URL = "https://xpdtmigeeicupyrvvsco.supabase.co/storage/v1/object/public/public-files/";
 
 async function uploadFile(e) {
     e.preventDefault();
@@ -92,13 +92,9 @@ async function uploadFile(e) {
 
     document.getElementById("status").innerText = "Uploading...";
 
-    // Metadata object
     const metadata = { subject, category, desc };
-
-    // Encode metadata
     const metaString = encodeURIComponent(JSON.stringify(metadata));
 
-    // Final file name format
     const safeName =
         Date.now() +
         "_" +
@@ -130,5 +126,3 @@ async function uploadFile(e) {
 
 </body>
 </html>
-
-
