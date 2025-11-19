@@ -74,64 +74,75 @@
   </section>
 
 <!-- ⭐ FINAL WORKING SCRIPT WITH METADATA -->
+<!-- Supabase Script -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-  const BUCKET_URL =
-  "https://xpdtmigeeicupyrvvsco.supabase.co/storage/v1/object/public/public-files/";
 
-
-
-
-
+const supabaseClient = supabase.createClient(
+  "https://xpdtmigeeicupyrvvsco.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZHRtaWdlZWljdXB5cnZ2c2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NDQzNjEsImV4cCI6MjA3OTEyMDM2MX0.N6vuRtutjFvbDpGutvFiWqLWKi5f2TeffiyLuSIt5Fk"
+);
 
 async function uploadFile(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    const subject = document.getElementById("subject").value;
-    const category = document.getElementById("category").value;
-    const desc = document.getElementById("desc").value;
-    const file = document.getElementById("fileInput").files[0];
+  const subject = document.getElementById("subject").value;
+  const category = document.getElementById("category").value;
+  const desc = document.getElementById("desc").value;
+  const file = document.getElementById("fileInput").files[0];
 
-    if (!file) {
-        alert("Please select a file!");
-        return;
-    }
+  if (!file) {
+    alert("Please select a file!");
+    return;
+  }
 
-    document.getElementById("status").innerText = "Uploading...";
+  document.getElementById("status").innerText = "Uploading...";
 
-    const metadata = { subject, category, desc };
-    const metaString = encodeURIComponent(JSON.stringify(metadata));
+  // File Name + Metadata Encoding
+  const metadata = { subject, category, desc };
+  const metaString = encodeURIComponent(JSON.stringify(metadata));
 
-    const safeName =
-        Date.now() +
-        "_" +
-        file.name.replace(/[^a-zA-Z0-9.]/g, "_") +
-        "__meta__" +
-        metaString;
+  const fileName =
+      Date.now() +
+      "_" +
+      file.name.replace(/[^a-zA-Z0-9.]/g, "_") +
+      "__meta__" +
+      metaString;
 
-    const uploadUrl = BUCKET_URL + safeName;
-
-    const response = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file
+  // Upload via SDK (NO CORS PROBLEM)
+  const { data, error } = await supabaseClient.storage
+    .from("public-files")
+    .upload(fileName, file, {
+      contentType: file.type
     });
 
-    if (response.ok) {
-        document.getElementById("status").innerText = "Upload Successful ✔✔";
+  if (error) {
+    console.error(error);
+    document.getElementById("status").innerText = "Upload failed ❌";
+    return;
+  }
 
-        document.getElementById("link").innerHTML =
-          `<br><b>File URL:</b> <a href="${uploadUrl}" target="_blank">${uploadUrl}</a>
-           <br><b>Subject:</b> ${subject}
-           <br><b>Category:</b> ${category}
-           <br><b>Description:</b> ${desc}`;
-    } else {
-        document.getElementById("status").innerText = "Upload failed ❌";
-    }
+  // Generate Public URL
+  const publicUrl =
+    "https://xpdtmigeeicupyrvvsco.supabase.co/storage/v1/object/public/public-files/" +
+    fileName;
+
+  document.getElementById("status").innerText = "Upload Successful ✔✔";
+
+  document.getElementById("link").innerHTML =
+    `<br><b>File URL:</b> <a href="${publicUrl}" target="_blank">${publicUrl}</a>
+     <br><b>Subject:</b> ${subject}
+     <br><b>Category:</b> ${category}
+     <br><b>Description:</b> ${desc}`;
 }
+
 </script>
+
 
 </body>
 </html>
+
 
 
 
