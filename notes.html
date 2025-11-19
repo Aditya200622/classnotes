@@ -3,186 +3,125 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notes — Classनोट्स U.P.S.I.F</title>
+  <title>All Notes</title>
 
-  <!-- MAIN THEME CSS -->
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- PAGE SPECIFIC CSS -->
   <style>
-    .page-hero {
-      padding: 60px 48px 30px;
-      background: linear-gradient(90deg, rgba(244,236,255,0.35), rgba(234,247,255,0.35));
+    body { font-family: Arial; margin:0; padding:0; background:#f5f5f5; }
+
+    .navbar {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:15px 25px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.1);
+      position:sticky; top:0; z-index:10;
     }
-    .page-hero h1 {
-      font-size: 40px;
-      font-weight: 900;
-      letter-spacing: -1px;
-      margin-bottom: 8px;
+    nav a, nav button { margin-left:20px; text-decoration:none; color:#333; }
+
+    .container { max-width:1100px; margin:40px auto; padding:20px; }
+
+    h1 { margin-bottom:15px; }
+
+    .search-filter {
+      display:flex; gap:10px; margin-bottom:25px;
     }
-    .page-hero p {
-      color: #6b7280;
-      max-width: 520px;
-    }
-    .filter-bar {
-      margin-top: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-    }
-    .filter-bar input[type="search"] {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1.5px solid #d1d5db;
-      min-width: 220px;
-    }
-    .chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .chip {
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: #eaf7ff;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid transparent;
-    }
-    .chip.active {
-      background: #11b79e;
-      color: #fff;
+    .search-filter input, .search-filter select {
+      flex:1; padding:10px; border-radius:8px; border:1px solid #ccc;
     }
 
-    /* Use existing .courses, .course-grid, .course-card from style.css */
+    .notes-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+      gap:20px;
+    }
 
-    @media (max-width: 768px) {
-      .page-hero {
-        padding: 40px 20px 20px;
-      }
-      .page-hero h1 {
-        font-size: 30px;
-      }
-      .filter-bar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .filter-bar input[type="search"] {
-        width: 100%;
-      }
+    .note-card {
+      background:white; padding:20px;
+      border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.07);
+      border-left:6px solid #4c6ef5;
+    }
+
+    .note-card h3 { margin:0; }
+    .note-card p { margin:6px 0; color:#444; }
+    .note-card a {
+      margin-top:10px; display:inline-block; text-decoration:none;
+      background:#4c6ef5; color:white; padding:8px 12px;
+      border-radius:8px;
     }
   </style>
 </head>
+
 <body>
 
-  <!-- NAVBAR (same as index) -->
   <header class="navbar">
     <div class="logo">Classनोट्स U.P.S.I.F</div>
-
-    <button class="mobile-menu-btn">☰</button>
-
     <nav>
       <a href="index.html">Home</a>
-      <a href="categories.html">Categories</a>
-      <a href="notes.html">Notes</a>
+      <a href="upload.html">Upload Notes</a>
+      <a href="#">Categories</a>
       <button class="btn-outline">Contact</button>
     </nav>
   </header>
 
-  <!-- PAGE HERO -->
-  <section class="page-hero">
-    <h1>All Notes at One Place</h1>
-    <p>Find subject-wise notes, previous year questions and syllabus PDFs for B.Tech, BSc–MSc and LLB students.</p>
+  <div class="container">
+    <h1>All Uploaded Notes 📚</h1>
 
-    <div class="filter-bar">
-      <input type="search" placeholder="Search notes (e.g. 'Engineering Physics Waves')" />
-
-      <div class="chip-row">
-        <span class="chip active">All</span>
-        <span class="chip">B.Tech</span>
-        <span class="chip">BSc–MSc</span>
-        <span class="chip">LLB</span>
-        <span class="chip">Mathematics</span>
-        <span class="chip">IT & CS</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- NOTES GRID (reuse .courses & .course-grid styles) -->
-  <section class="courses">
-    <div class="course-header">
-      <h2 class="section-title">Latest Uploaded Notes</h2>
-      <button class="btn-outline">Sort by Latest</button>
+    <div class="search-filter">
+      <input id="searchBox" placeholder="Search by subject or description..." />
+      <select id="categoryFilter">
+        <option value="">All Categories</option>
+        <option>B.Tech</option>
+        <option>BSc–MSc</option>
+        <option>LLB</option>
+        <option>Mathematics</option>
+        <option>IT & CS</option>
+      </select>
     </div>
 
-    <div class="course-grid">
-
-      <!-- Card 1 -->
-      <div class="course-card">
-        <div class="thumb" style="background:url('https://via.placeholder.com/500x300?text=Physics') center/cover;"></div>
-        <div class="c-content">
-          <div class="instructor">
-            <img src="tech.png" />
-            <span>B.Tech</span>
-          </div>
-          <h3>Engineering Physics — Waves & Oscillations</h3>
-          <div class="meta">
-            <span>Notes • PDF</span>
-            <span>Unit 1</span>
-          </div>
-          <div class="price">
-            <strong class="free">Free</strong>
-            <a href="note-details.html">Open</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 2 -->
-      <div class="course-card">
-        <div class="thumb" style="background:url('https://via.placeholder.com/500x300?text=Chemistry') center/cover;"></div>
-        <div class="c-content">
-          <div class="instructor">
-            <img src="bsc.png" />
-            <span>BSc–MSc</span>
-          </div>
-          <h3>Organic Chemistry — Reaction Mechanism Basics</h3>
-          <div class="meta">
-            <span>Handwritten Notes</span>
-            <span>PDF</span>
-          </div>
-          <div class="price">
-            <strong class="free">Free</strong>
-            <a href="note-details.html">Open</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 3 -->
-      <div class="course-card">
-        <div class="thumb" style="background:url('https://via.placeholder.com/500x300?text=Law') center/cover;"></div>
-        <div class="c-content">
-          <div class="instructor">
-            <img src="llb.png" />
-            <span>LLB</span>
-          </div>
-          <h3>IPC — Important Bare Act Sections (Short Notes)</h3>
-          <div class="meta">
-            <span>Exam-Oriented</span>
-            <span>PDF</span>
-          </div>
-          <div class="price">
-            <strong class="free">Free</strong>
-            <a href="note-details.html">Open</a>
-          </div>
-        </div>
-      </div>
-
+    <div class="notes-grid" id="notesContainer">
+      <p>Loading notes...</p>
     </div>
-  </section>
+  </div>
 
-  <!-- JS (same file) -->
-  <script src="app.js"></script>
+<script>
+const BASE_URL = "https://xpdtmigeeiucpyrvvsco.supabase.co/storage/v1/object/public/public-files/";
+
+async function loadNotes() {
+    let container = document.getElementById("notesContainer");
+
+    const res = await fetch("https://xpdtmigeeiucpyrvvsco.supabase.co/storage/v1/object/list/public-files", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await res.json();
+
+    container.innerHTML = "";
+
+    let notesList = data;
+
+    notesList.forEach(file => {
+        const nameParts = file.name.split("__meta__");
+
+        let meta = { subject: "Unknown", category: "Other", desc: "No description" };
+        if (nameParts.length === 2) {
+            try { meta = JSON.parse(decodeURIComponent(nameParts[1])); }
+            catch(e) {}
+        }
+
+        const url = BASE_URL + file.name;
+
+        container.innerHTML += `
+          <div class="note-card">
+            <h3>${meta.subject}</h3>
+            <p><b>Category:</b> ${meta.category}</p>
+            <p>${meta.desc}</p>
+            <a href="${url}" target="_blank">Open / Download</a>
+          </div>
+        `;
+    });
+}
+
+loadNotes();
+</script>
+
 </body>
 </html>
+
