@@ -5,8 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Upload Your Notes</title>
   <link rel="stylesheet" href="upload.css" />
+  <style>
+    body { font-family: Arial, sans-serif; background:#fafafa; margin:0; }
+    .navbar { display:flex; justify-content:space-between; padding:15px 25px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    nav a, nav button { margin-left:20px; text-decoration:none; font-size:16px; color:#333; }
+    
+    .upload-section { max-width:550px; margin:70px auto; background:white; padding:30px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.07); }
+    h1 { margin-bottom:5px; }
+    .subtitle { color:#444; margin-bottom:25px; }
+
+    .upload-form label { display:block; margin-bottom:6px; font-weight:bold; }
+    .upload-form input, .upload-form select, .upload-form textarea {
+      width:100%; padding:10px; margin-bottom:20px; border:1px solid #ccc; border-radius:8px;
+    }
+
+    .btn-primary {
+      width:100%; background:#4c6ef5; color:white; border:none; padding:12px;
+      font-size:17px; border-radius:8px; cursor:pointer;
+    }
+    .btn-primary:hover { background:#3b5bdb; }
+
+    #status { font-size:15px; margin-top:20px; }
+  </style>
 </head>
+
 <body>
+
   <header class="navbar">
     <div class="logo">Classनोट्स U.P.S.I.F</div>
     <nav>
@@ -21,12 +45,13 @@
     <h1>Upload Your Notes 🖊️</h1>
     <p class="subtitle">Share your notes with thousands of students. Fast, easy and free.</p>
 
-    <form class="upload-form">
+    <form class="upload-form" onsubmit="uploadFile(event)">
+      
       <label>Subject Name</label>
-      <input type="text" placeholder="Enter subject (e.g. Engineering Physics)" required />
+      <input id="subject" type="text" placeholder="Enter subject" required />
 
       <label>Category</label>
-      <select required>
+      <select id="category" required>
         <option value="">Select Category</option>
         <option>B.Tech</option>
         <option>BSc–MSc</option>
@@ -36,14 +61,60 @@
       </select>
 
       <label>Upload PDF / Images</label>
-      <input type="file" accept="application/pdf,image/*" multiple required />
+      <input id="fileInput" type="file" accept="application/pdf,image/*" multiple required />
 
       <label>Description</label>
-      <textarea placeholder="Short description about these notes..."></textarea>
+      <textarea id="desc" placeholder="Short description..."></textarea>
 
       <button class="btn-primary" type="submit">Upload Now</button>
     </form>
+
+    <p id="status"></p>
+    <p id="link"></p>
   </section>
+
+<script>
+const BUCKET_URL = "https://xpdtmigeeiucpyrvvsco.supabase.co/storage/v1/object/public/public-files/";
+
+async function uploadFile(e) {
+    e.preventDefault();
+
+    const subject = document.getElementById("subject").value;
+    const category = document.getElementById("category").value;
+    const desc = document.getElementById("desc").value;
+    const file = document.getElementById("fileInput").files[0];
+
+    if (!file) {
+        alert("Please select a file!");
+        return;
+    }
+
+    document.getElementById("status").innerText = "Uploading...";
+
+    const safeName = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+
+    const uploadUrl = BUCKET_URL + safeName;
+
+    const res = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file
+    });
+
+    if (res.ok) {
+        document.getElementById("status").innerText = "Upload Successful ✔✔";
+
+        document.getElementById("link").innerHTML =
+          `<br><b>File URL:</b> <a href="${uploadUrl}" target="_blank">${uploadUrl}</a>
+           <br><b>Subject:</b> ${subject}
+           <br><b>Category:</b> ${category}
+           <br><b>Description:</b> ${desc}`;
+
+    } else {
+        document.getElementById("status").innerText = "Upload failed ❌";
+    }
+}
+</script>
 
 </body>
 </html>
