@@ -1,6 +1,6 @@
 /* -------------------------
-   EduSkill - Final style.css (UPDATED WITH FIXES)
-   ------------------------- */
+   EduSkill - Final style.css (UPDATED FOR FULL MOBILE OPTIMIZATION)
+------------------------- */
 
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -78,7 +78,7 @@ body{
   align-items:flex-end;
 }
 
-/* HERO IMG FIXED */
+/* HERO IMG */
 .hero-img{
   width:100%;
   max-width:420px;
@@ -88,7 +88,7 @@ body{
   box-shadow:0 20px 50px rgba(10,35,66,0.08);
 }
 
-/* FLOAT CARD FIXED */
+/* FLOAT CARD */
 .float-card{
   position:absolute; left:0; bottom:36px;
   width:240px; min-height:120px; background:#fff; border-radius:16px;
@@ -116,7 +116,7 @@ body{
 .yellow{background:#fff4eb}
 .soft-yellow{background:#fff8f2}
 
-/* ---------- FEATURE CARDS ---------- */
+/* ---------- FEATURES ---------- */
 .features{padding:64px 48px;display:flex;gap:28px}
 .feature-card{flex:1;background:#fff;padding:32px;border-radius:18px;position:relative;overflow:visible;box-shadow:0 14px 40px rgba(10,35,66,0.06)}
 .feature-card.blue-bg{background:#f0fbff}
@@ -177,25 +177,108 @@ footer{padding:28px;text-align:center;color:#6b7280}
 }
 
 @media (max-width:768px){
-  .navbar{padding:0 20px}
+
+  /* NAVBAR (MOBILE) */
+  .navbar{
+    padding:0 16px;
+    height:70px;
+  }
   .mobile-menu-btn{display:block}
   .navbar nav{
-    position:absolute;left:0;right:0;top:80px;background:#fff;padding:18px 20px;
+    position:absolute;left:0;right:0;top:70px;background:#fff;padding:18px 20px;
     display:flex;flex-direction:column;gap:12px;align-items:center;z-index:50;
-    transform:translateY(-8px);opacity:0;pointer-events:none;transition:all .18s ease
+    transform:translateY(-18px);opacity:0;pointer-events:none;transition:all .22s ease
   }
   .navbar nav.show{transform:translateY(0);opacity:1;pointer-events:auto}
-  .hero{flex-direction:column;align-items:center;padding:40px 20px;text-align:center}
-  .hero-left h1{font-size:36px}
-  .hero-right{margin-top:28px;flex-basis:auto}
-  .hero-img{width:80%;max-width:360px}
-  .float-card{
-    position:relative;left:50%;transform:translateX(-50%);
-    bottom:-20px;width:86%;max-width:360px
+
+  /* HERO MOBILE */
+  .hero{
+    flex-direction:column;
+    align-items:center;
+    padding:40px 18px;
+    text-align:center;
+    gap:14px;
   }
-  .category-grid{grid-template-columns:repeat(2,1fr)}
-  .course-grid{grid-template-columns:1fr}
-  .news-grid{grid-template-columns:1fr}
-  .stats{flex-direction:column;text-align:center;padding:36px 20px;margin:18px 20px}
+  .hero-left h1{
+    font-size:36px;
+    line-height:1.1;
+  }
+  .sub-text{
+    font-size:15px;
+    margin-top:10px;
+  }
+  .hero-img{
+    width:82%;
+    max-width:340px;
+  }
+
+  /* FLOAT CARD */
+  .float-card{
+    position:relative;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:-12px;
+    width:92%;
+    max-width:360px;
+  }
+
+  /* CATEGORY GRID */
+  .categories{padding:56px 20px}
+  .category-grid{
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+  }
+  .cat-card{
+    padding:16px;
+    font-size:15px;
+    border-radius:28px;
+  }
+
+  /* FEATURES */
+  .features{
+    flex-direction:column;
+    gap:20px;
+    padding:40px 20px;
+  }
+
+  /* COURSES */
+  .courses{
+    padding:40px 20px;
+  }
+  .course-grid{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+
+  /* NEWS */
+  .news{
+    padding:40px 20px;
+  }
+  .news-grid{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+
+  /* STATS */
+  .stats{
+    flex-direction:column;
+    gap:14px;
+    padding:32px 20px;
+    margin:20px;
+    text-align:center;
+  }
+
+  /* SUBSCRIBE */
+  .subscribe{
+    padding:60px 20px;
+  }
   .left-img,.right-img{display:none}
+
+  /* FOOTER */
+  footer{
+    padding:18px;
+    font-size:14px;
+  }
 }
+
+
