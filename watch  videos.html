@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watch Videos – Classनोट्स U.P.S.I.F</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* Page specific styling */
+    .video-section {
+      max-width: 1050px;
+      margin: 70px auto;
+      padding: 0 20px;
+    }
+
+    .video-title {
+      text-align: center;
+      font-size: 36px;
+      font-weight: 800;
+      color: #0a2342;
+      margin-bottom: 30px;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .video-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 14px 40px rgba(10,35,66,0.06);
+      transition: .2s;
+    }
+
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 44px rgba(10,35,66,0.09);
+    }
+
+    .video-thumb {
+      width: 100%;
+      height: 180px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .video-content {
+      padding: 18px;
+    }
+
+    .video-content h3 {
+      font-size: 18px;
+      color: #0a2342;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .video-content p {
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .watch-btn {
+      margin-top: 12px;
+      display: inline-block;
+      padding: 10px 18px;
+      background: #11b79e;
+      color: white;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .watch-btn:hover {
+      background: #0fa88f;
+    }
+
+    /* Mobile Optimize */
+    @media (max-width:768px){
+      .video-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .video-title {
+        font-size: 28px;
+      }
+
+      .video-thumb {
+        height: 190px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="logo">Classनोट्स U.P.S.I.F</div>
+    <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+
+    <nav id="mobileMenu">
+      <a href="index.html">Home</a>
+      <a href="notes.html">Notes</a>
+      <a href="upload.html">Upload Notes</a>
+      <a href="syllabus.html">Syllabus</a>
+      <a href="watch-videos.html">Videos</a>
+    </nav>
+  </header>
+
+  <!-- VIDEO SECTION -->
+  <section class="video-section">
+    <h1 class="video-title">🎥 Watch Topic-wise Videos</h1>
+
+    <div class="video-grid">
+
+      <div class="video-card">
+        <div class="video-thumb" style="background-image:url('https://i.ytimg.com/vi/0n2TcQUXuuc/maxresdefault.jpg')"></div>
+        <div class="video-content">
+          <h3>Forensic Science Basics</h3>
+          <p>30-minute lecture covering crime scene basics, documentation, and evidence types.</p>
+          <a class="watch-btn" href="https://youtube.com" target="_blank">Watch Now</a>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="video-thumb" style="background-image:url('https://i.ytimg.com/vi/YJyD7s-7MFc/maxresdefault.jpg')"></div>
+        <div class="video-content">
+          <h3>Cyber Security Lecture</h3>
+          <p>Beginners to advanced network security explained with real examples.</p>
+          <a class="watch-btn" href="https://youtube.com" target="_blank">Watch Now</a>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="video-thumb" style="background-image:url('https://i.ytimg.com/vi/tgbNymZ7vqY/maxresdefault.jpg')"></div>
+        <div class="video-content">
+          <h3>Law & Criminology</h3>
+          <p>IPC, CrPC, IEA basics explained in simple language for students.</p>
+          <a class="watch-btn" href="https://youtube.com" target="_blank">Watch Now</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+<script>
+function toggleMenu(){
+  document.getElementById("mobileMenu").classList.toggle("show");
+}
+</script>
+
+</body>
+</html>
