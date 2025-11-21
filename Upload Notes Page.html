@@ -7,20 +7,36 @@
   <link rel="stylesheet" href="upload.css" />
   <style>
     body { font-family: Arial, sans-serif; background:#fafafa; margin:0; }
-    .navbar { display:flex; justify-content:space-between; padding:15px 25px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-    nav a, nav button { margin-left:20px; text-decoration:none; font-size:16px; color:#333; }
+    .navbar {
+      display:flex; justify-content:space-between;
+      padding:15px 25px; background:white;
+      box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    }
+    nav a, nav button {
+      margin-left:20px; text-decoration:none;
+      font-size:16px; color:#333;
+    }
     
-    .upload-section { max-width:550px; margin:70px auto; background:white; padding:30px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.07); }
+    .upload-section {
+      max-width:550px; margin:70px auto;
+      background:white; padding:30px;
+      border-radius:12px;
+      box-shadow:0 5px 20px rgba(0,0,0,0.07);
+    }
     h1 { margin-bottom:5px; }
     .subtitle { color:#444; margin-bottom:25px; }
 
     .upload-form label { display:block; margin-bottom:6px; font-weight:bold; }
-    .upload-form input, .upload-form select, .upload-form textarea {
-      width:100%; padding:10px; margin-bottom:20px; border:1px solid #ccc; border-radius:8px;
+    .upload-form input,
+    .upload-form select,
+    .upload-form textarea {
+      width:100%; padding:10px; margin-bottom:20px;
+      border:1px solid #ccc; border-radius:8px;
     }
 
     .btn-primary {
-      width:100%; background:#4c6ef5; color:white; border:none; padding:12px;
+      width:100%; background:#4c6ef5; color:white;
+      border:none; padding:12px;
       font-size:17px; border-radius:8px; cursor:pointer;
     }
     .btn-primary:hover { background:#3b5bdb; }
@@ -46,23 +62,30 @@
     <p class="subtitle">Share your notes with thousands of students. Fast, easy and free.</p>
 
     <form class="upload-form" onsubmit="uploadFile(event)">
-      
-      <label>Subject Name</label>
-      <input id="subject" type="text" placeholder="Enter subject" required />
+      <!-- Title -->
+      <label>Title</label>
+      <input id="title" type="text" placeholder="Enter notes title" required />
 
-      <label>Category</label>
-      <select id="category" required>
-        <option value="">Select Category</option>
-        <option>B.Tech</option>
-        <option>BSc–MSc</option>
-        <option>LLB</option>
-        <option>Mathematics</option>
-        <option>IT & CS</option>
+      <!-- Subject dropdown (loaded from Supabase 'subjects' table) -->
+      <label>Subject</label>
+      <select id="subject" required>
+        <option value="">Loading subjects...</option>
       </select>
 
+      <!-- Class / Grade -->
+      <label>Class / Grade</label>
+      <select id="classGrade" required>
+        <option value="">Select Class / Grade</option>
+        <option value="B.Tech-M.Tech">B.Tech / M.Tech</option>
+        <option value="BSc-MSc">BSc / MSc</option>
+        <option value="LLB-LLM">LLB / LLM</option>
+      </select>
+
+      <!-- File -->
       <label>Upload PDF / Images</label>
       <input id="fileInput" type="file" accept="application/pdf,image/*" required />
 
+      <!-- Description (optional) -->
       <label>Description</label>
       <textarea id="desc" placeholder="Short description..."></textarea>
 
@@ -73,75 +96,124 @@
     <p id="link"></p>
   </section>
 
-<!-- ⭐ FINAL WORKING SCRIPT WITH METADATA -->
-<!-- Supabase Script -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS (v2) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.4/dist/umd/supabase.js"></script>
 
-<script>
+  <script>
+    // ✅ NAYA PROJECT DETAILS (tumne jo bheja tha)
+    const supabaseUrl = "https://okewyhiqgdvwipjacoyp.supabase.co";
+    const supabaseAnonKey =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rZXd5aGlxZ2R2d2lwamFjb3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTcxMjcsImV4cCI6MjA3OTIzMzEyN30.SH4dcOOFqM4FWX1UCRTC-ycfrSaCHyul_nTA0yfkwv0";
 
-const supabaseClient = supabase.createClient(
-  "https://xpdtmigeeicupyrvvsco.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZHRtaWdlZWljdXB5cnZ2c2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NDQzNjEsImV4cCI6MjA3OTEyMDM2MX0.N6vuRtutjFvbDpGutvFiWqLWKi5f2TeffiyLuSIt5Fk"
-);
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-async function uploadFile(e) {
-  e.preventDefault();
+    // ---------- LOAD SUBJECTS FROM DB ----------
+    async function loadSubjects() {
+      const sel = document.getElementById("subject");
+      sel.innerHTML = '<option value="">Loading subjects...</option>';
 
-  const subject = document.getElementById("subject").value;
-  const category = document.getElementById("category").value;
-  const desc = document.getElementById("desc").value;
-  const file = document.getElementById("fileInput").files[0];
+      const { data, error } = await supabaseClient
+        .from("subjects")
+        .select("id, name")
+        .order("name", { ascending: true });
 
-  if (!file) {
-    alert("Please select a file!");
-    return;
-  }
+      if (error) {
+        console.error("Error loading subjects:", error);
+        sel.innerHTML = '<option value="">Error loading subjects</option>';
+        return;
+      }
 
-  document.getElementById("status").innerText = "Uploading...";
+      if (!data || data.length === 0) {
+        sel.innerHTML = '<option value="">No subjects found</option>';
+        return;
+      }
 
-  // File Name + Metadata Encoding
-  const metadata = { subject, category, desc };
-  const metaString = encodeURIComponent(JSON.stringify(metadata));
+      sel.innerHTML = '<option value="">Select Subject</option>';
+      data.forEach((sub) => {
+        const opt = document.createElement("option");
+        opt.value = sub.id;          // store subject id
+        opt.textContent = sub.name;  // show subject name
+        sel.appendChild(opt);
+      });
+    }
 
-  const fileName =
-      Date.now() +
-      "_" +
-      file.name.replace(/[^a-zA-Z0-9.]/g, "_") +
-      "__meta__" +
-      metaString;
+    window.addEventListener("DOMContentLoaded", loadSubjects);
 
-  // Upload via SDK (NO CORS PROBLEM)
-  const { data, error } = await supabaseClient.storage
-    .from("public-files")
-    .upload(fileName, file, {
-      contentType: file.type
-    });
+    // ---------- UPLOAD FUNCTION ----------
+    async function uploadFile(e) {
+      e.preventDefault();
 
-  if (error) {
-    console.error(error);
-    document.getElementById("status").innerText = "Upload failed ❌";
-    return;
-  }
+      const title = document.getElementById("title").value.trim();
+      const subjectSelect = document.getElementById("subject");
+      const subjectId = subjectSelect.value;
+      const subjectName =
+        subjectSelect.options[subjectSelect.selectedIndex]?.text || "";
+      const classGrade = document.getElementById("classGrade").value;
+      const desc = document.getElementById("desc").value.trim();
+      const file = document.getElementById("fileInput").files[0];
 
-  // Generate Public URL
-  const publicUrl =
-    "https://xpdtmigeeicupyrvvsco.supabase.co/storage/v1/object/public/public-files/" +
-    fileName;
+      if (!file) {
+        alert("Please select a file!");
+        return;
+      }
 
-  document.getElementById("status").innerText = "Upload Successful ✔✔";
+      if (!subjectId) {
+        alert("Please select a subject!");
+        return;
+      }
 
-  document.getElementById("link").innerHTML =
-    `<br><b>File URL:</b> <a href="${publicUrl}" target="_blank">${publicUrl}</a>
-     <br><b>Subject:</b> ${subject}
-     <br><b>Category:</b> ${category}
-     <br><b>Description:</b> ${desc}`;
-}
+      if (!classGrade) {
+        alert("Please select class / grade!");
+        return;
+      }
 
-</script>
+      document.getElementById("status").innerText = "Uploading...";
 
+      // Metadata jo filename mein encode hoga
+      const metadata = {
+        title,
+        subject_id: subjectId,
+        subject_name: subjectName,
+        class_grade: classGrade,
+        desc,
+      };
+      const metaString = encodeURIComponent(JSON.stringify(metadata));
 
+      const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+      const fileName = Date.now() + "_" + safeName + "__meta__" + metaString;
+
+      // ✅ NEW BUCKET: notes_files
+      const { data, error } = await supabaseClient.storage
+        .from("notes_files")
+        .upload(fileName, file, {
+          contentType: file.type,
+        });
+
+      if (error) {
+        console.error(error);
+        document.getElementById("status").innerText = "Upload failed ❌";
+        return;
+      }
+
+      // Public URL for notes_files bucket
+      const publicUrl =
+        "https://okewyhiqgdvwipjacoyp.supabase.co/storage/v1/object/public/notes_files/" +
+        fileName;
+
+      document.getElementById("status").innerText = "Upload Successful ✔✔";
+
+      document.getElementById("link").innerHTML =
+        `<br><b>File URL:</b> <a href="${publicUrl}" target="_blank">${publicUrl}</a>
+         <br><b>Title:</b> ${title}
+         <br><b>Subject:</b> ${subjectName}
+         <br><b>Class/Grade:</b> ${classGrade}
+         <br><b>Description:</b> ${desc || "-"} `;
+    }
+  </script>
 </body>
 </html>
+
+
 
 
 
