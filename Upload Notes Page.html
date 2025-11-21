@@ -46,17 +46,15 @@
     <p class="subtitle">Share your notes with thousands of students. Fast, easy and free.</p>
 
     <form class="upload-form" onsubmit="uploadFile(event)">
-      <!-- Title -->
+      
       <label>Title</label>
       <input id="title" type="text" placeholder="Enter title" required />
 
-      <!-- Subject from DB -->
       <label>Subject</label>
       <select id="subject" required>
         <option value="">Loading subjects...</option>
       </select>
 
-      <!-- Class / Grade -->
       <label>Class / Grade</label>
       <select id="classGrade" required>
         <option value="">Select Class / Grade</option>
@@ -68,11 +66,9 @@
         <option value="LLM">LLM</option>
       </select>
 
-      <!-- File -->
       <label>Upload PDF / Images</label>
       <input id="fileInput" type="file" accept="application/pdf,image/*" required />
 
-      <!-- Description -->
       <label>Description</label>
       <textarea id="desc" placeholder="Short description..."></textarea>
 
@@ -83,18 +79,18 @@
     <p id="link"></p>
   </section>
 
-  <!-- Supabase JS v2 (UMD) -->
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.4/dist/umd/supabase.js"></script>
 
   <script>
-    // ---- Supabase client (tumhara new project) ----
     const supabaseUrl = "https://okewyhiqgdvwipjacoyp.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rZXd5aGlxZ2R2d2lwamFjb3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTcxMjcsImV4cCI6MjA3OTIzMzEyN30.SH4dcOOFqM4FWX1UCRTC-ycfrSaCHyul_nTA0yfkwv0";
+    const supabaseKey =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rZXd5aGlxZ2R2d2lwamFjb3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTcxMjcsImV4cCI6MjA3OTIzMzEyN30.SH4dcOOFqM4FWX1UCRTC-ycfrSaCHyul_nTA0yfkwv0";
 
     const { createClient } = supabase;
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-    // -------------- STEP 1: Load subjects into dropdown --------------
+    // Load subjects
     async function loadSubjects() {
       const sel = document.getElementById("subject");
       sel.innerHTML = '<option value="">Loading...</option>';
@@ -102,19 +98,17 @@
       const { data, error } = await supabaseClient
         .from("subjects")
         .select("id, name")
-        .order("name", { ascending: true });
+        .order("name");
 
       if (error) {
-        console.error("Error loading subjects:", error);
-        sel.innerHTML = '<option value="">Failed to load subjects</option>';
+        sel.innerHTML = '<option value="">Failed to load</option>';
         return;
       }
 
       sel.innerHTML = '<option value="">Select Subject</option>';
-
-      data.forEach((sub) => {
+      data.forEach(sub => {
         const opt = document.createElement("option");
-        opt.value = sub.id;       // uuid
+        opt.value = sub.id;
         opt.textContent = sub.name;
         sel.appendChild(opt);
       });
@@ -122,7 +116,7 @@
 
     document.addEventListener("DOMContentLoaded", loadSubjects);
 
-    // -------------- STEP 2: Upload file + insert row in notes --------------
+    // Upload File
     async function uploadFile(e) {
       e.preventDefault();
 
@@ -134,45 +128,30 @@
 
       const statusEl = document.getElementById("status");
       const linkEl = document.getElementById("link");
-      statusEl.textContent = "";
-      linkEl.innerHTML = "";
 
-      if (!file) {
-        alert("Please select a file!");
-        return;
-      }
-      if (!subjectId) {
-        alert("Please select a subject!");
-        return;
-      }
-      if (!classGrade) {
-        alert("Please select class/grade!");
+      statusEl.textContent = "";
+
+      if (!file || !subjectId || !classGrade) {
+        alert("Please fill all fields!");
         return;
       }
 
       statusEl.textContent = "Uploading file...";
 
-      // Unique path inside bucket
       const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
       const filePath = `notes/${Date.now()}_${cleanName}`;
 
-      // 1) Upload to storage bucket: notes_files
       const { data: storageData, error: storageError } = await supabaseClient
         .storage
         .from("notes_files")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: file.type
-        });
+        .upload(filePath, file);
 
       if (storageError) {
-        console.error("Storage upload error:", storageError);
-        statusEl.textContent = "Upload failed ❌ (storage error)";
+        statusEl.textContent = "Upload failed ❌";
+        console.error(storageError);
         return;
       }
 
-      // 2) Get public URL
       const { data: publicUrlData } = supabaseClient
         .storage
         .from("notes_files")
@@ -180,47 +159,27 @@
 
       const fileUrl = publicUrlData.publicUrl;
 
-      statusEl.textContent = "Saving note details...";
+      statusEl.textContent = "Saving to database...";
 
-      // 3) Insert row into notes table
       const { error: insertError } = await supabaseClient
         .from("notes")
         .insert([
           {
-            title: title,
+            title,
             description: desc,
-            subject_id: subjectId,      // uuid from dropdown
+            subject_id: subjectId,
             class_grade: classGrade,
             file_url: fileUrl
-            // tags, uploaded_by, uploaded_at -> defaults / null
           }
         ]);
 
       if (insertError) {
-        console.error("Insert error:", insertError);
-        statusEl.textContent = "Upload failed ❌ (database error)";
+        statusEl.textContent = "Database error ❌";
+        console.error(insertError);
         return;
       }
 
       statusEl.textContent = "Upload Successful ✔✔";
-      // Insert record into "notes" table
-const { error: insertError } = await supabaseClient
-  .from("notes")
-  .insert({
-    title: subject,
-    description: desc,
-    class_grade: category,
-    subject_id: null, // Abhi null rakhte hain
-    file_url: publicUrl,
-    uploaded_by: null
-  });
-
-if (insertError) {
-  console.error("DB Insert Error:", insertError);
-} else {
-  console.log("Saved Successfully to notes table!");
-}
-
 
       linkEl.innerHTML = `
         <br><b>File URL:</b> <a href="${fileUrl}" target="_blank">${fileUrl}</a>
@@ -230,14 +189,13 @@ if (insertError) {
         <br><b>Description:</b> ${desc || "-"}
       `;
 
-      // Optional: form reset
       e.target.reset();
-      document.getElementById("subject").selectedIndex = 0;
-      document.getElementById("classGrade").selectedIndex = 0;
     }
   </script>
 </body>
 </html>
+
+
 
 
 
