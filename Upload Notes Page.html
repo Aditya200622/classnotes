@@ -203,6 +203,24 @@
       }
 
       statusEl.textContent = "Upload Successful ✔✔";
+      // Insert record into "notes" table
+const { error: insertError } = await supabaseClient
+  .from("notes")
+  .insert({
+    title: subject,
+    description: desc,
+    class_grade: category,
+    subject_id: null, // Abhi null rakhte hain
+    file_url: publicUrl,
+    uploaded_by: null
+  });
+
+if (insertError) {
+  console.error("DB Insert Error:", insertError);
+} else {
+  console.log("Saved Successfully to notes table!");
+}
+
 
       linkEl.innerHTML = `
         <br><b>File URL:</b> <a href="${fileUrl}" target="_blank">${fileUrl}</a>
@@ -220,6 +238,7 @@
   </script>
 </body>
 </html>
+
 
 
 
