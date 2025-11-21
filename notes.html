@@ -1,113 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>All Notes</title>
 
   <style>
-    body { font-family: Arial, sans-serif; background:#f5f5f5; margin:0; }
-    .navbar { display:flex; justify-content:space-between; padding:15px 25px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-    nav a { margin-left:20px; text-decoration:none; font-size:16px; color:#333; }
-
-    .container { max-width:900px; margin:60px auto; }
-    h1 { text-align:center; margin-bottom:30px; }
-
-    .note-card {
-      background:white; padding:20px; border-radius:12px;
-      box-shadow:0 4px 18px rgba(0,0,0,0.08);
-      margin-bottom:20px;
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
     }
-    .note-card a { color:#4c6ef5; font-weight:bold; }
-    .meta { color:#555; margin-top:8px; }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .note-card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    .note-card a {
+      color: blue;
+      font-weight: bold;
+    }
   </style>
 </head>
 
 <body>
 
-<header class="navbar">
-  <div class="logo">Classनोट्स U.P.S.I.F</div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="upload.html">Upload Notes</a>
-    <a href="#">Categories</a>
-  </nav>
-</header>
+  <h1>📚 All Uploaded Notes</h1>
 
-<div class="container">
-  <h1>All Uploaded Notes 📚</h1>
-  <p id="loading">Loading notes...</p>
-  <div id="notes"></div>
-</div>
+  <div id="notesList">Loading...</div>
 
-<script>
-const PROJECT_URL = "https://xpdtmigeeicupyrvvsco.supabase.co";
-const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZHRtaWdlZWljdXB5cnZ2c2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NDQzNjEsImV4cCI6MjA3OTEyMDM2MX0.N6vuRtutjFvbDpGutvFiWqLWKi5f2TeffiyLuSIt5Fk";
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-const BUCKET = "public-files";
+  <script>
 
-async function loadNotes() {
+    const supabaseClient = supabase.createClient(
+      "https://okewyhiqgdvwipjacoyp.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rZXd5aGlxZ2R2d2lwamFjb3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTcxMjcsImV4cCI6MjA3OTIzMzEyN30.SH4dcOOFqM4FWX1UCRTC-ycfrSaCHyul_nTA0yfkwv0"
+    );
 
-    const url = `${PROJECT_URL}/storage/v1/object/list/${BUCKET}`;
+    async function loadNotes() {
+      const { data, error } = await supabaseClient
+        .from("notes")
+        .select("*")
+        .order("uploaded_at", { ascending: false });
 
-    const res = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "apikey": ANON_KEY,
-            "Authorization": `Bearer ${ANON_KEY}`
-        },
-        body: JSON.stringify({
-            prefix: "",       // root folder
-        })
-    });
-
-    const data = await res.json();
-
-    console.log("LIST RESPONSE =", data); // DEBUG
-
-    document.getElementById("loading").style.display = "none";
-    const container = document.getElementById("notes");
-
-    if (!Array.isArray(data)) {
-        container.innerHTML = "<p>❌ Failed to load notes.</p>";
+      if (error) {
+        document.getElementById("notesList").innerHTML = "Error loading notes!";
         return;
+      }
+
+      let html = "";
+
+      data.forEach(n => {
+        html += `
+          <div class="note-card">
+            <h2>${n.title}</h2>
+            <p><b>Description:</b> ${n.description}</p>
+            <p><b>Class/Grade:</b> ${n.class_grade}</p>
+            <p><a href="${n.file_url}" target="_blank">📄 View PDF</a></p>
+          </div>
+        `;
+      });
+
+      document.getElementById("notesList").innerHTML = html;
     }
 
-    data.forEach(file => {
-        const name = file.name;
+    loadNotes();
 
-        if (!name.includes("__meta__")) return;
-
-        const [pure, metaPart] = name.split("__meta__");
-
-        let meta = {};
-        try {
-            meta = JSON.parse(decodeURIComponent(metaPart));
-        } catch {}
-
-        const fileUrl = `${PROJECT_URL}/storage/v1/object/public/${BUCKET}/${name}`;
-
-        const card = `
-            <div class="note-card">
-                <a href="${fileUrl}" target="_blank">📄 ${meta.subject || "Untitled"}</a>
-                <div class="meta">
-                    <b>Category:</b> ${meta.category || ""}
-                    <br>
-                    <b>Description:</b> ${meta.desc || ""}
-                </div>
-            </div>
-        `;
-
-        container.innerHTML += card;
-    });
-
-}
-loadNotes();
-</script>
+  </script>
 
 </body>
 </html>
+
 
 
 
