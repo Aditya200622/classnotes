@@ -7,36 +7,20 @@
   <link rel="stylesheet" href="upload.css" />
   <style>
     body { font-family: Arial, sans-serif; background:#fafafa; margin:0; }
-    .navbar {
-      display:flex; justify-content:space-between;
-      padding:15px 25px; background:white;
-      box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    }
-    nav a, nav button {
-      margin-left:20px; text-decoration:none;
-      font-size:16px; color:#333;
-    }
+    .navbar { display:flex; justify-content:space-between; padding:15px 25px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    nav a, nav button { margin-left:20px; text-decoration:none; font-size:16px; color:#333; }
     
-    .upload-section {
-      max-width:550px; margin:70px auto;
-      background:white; padding:30px;
-      border-radius:12px;
-      box-shadow:0 5px 20px rgba(0,0,0,0.07);
-    }
+    .upload-section { max-width:550px; margin:70px auto; background:white; padding:30px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.07); }
     h1 { margin-bottom:5px; }
     .subtitle { color:#444; margin-bottom:25px; }
 
     .upload-form label { display:block; margin-bottom:6px; font-weight:bold; }
-    .upload-form input,
-    .upload-form select,
-    .upload-form textarea {
-      width:100%; padding:10px; margin-bottom:20px;
-      border:1px solid #ccc; border-radius:8px;
+    .upload-form input, .upload-form select, .upload-form textarea {
+      width:100%; padding:10px; margin-bottom:20px; border:1px solid #ccc; border-radius:8px;
     }
 
     .btn-primary {
-      width:100%; background:#4c6ef5; color:white;
-      border:none; padding:12px;
+      width:100%; background:#4c6ef5; color:white; border:none; padding:12px;
       font-size:17px; border-radius:8px; cursor:pointer;
     }
     .btn-primary:hover { background:#3b5bdb; }
@@ -64,9 +48,9 @@
     <form class="upload-form" onsubmit="uploadFile(event)">
       <!-- Title -->
       <label>Title</label>
-      <input id="title" type="text" placeholder="Enter notes title" required />
+      <input id="title" type="text" placeholder="Enter title" required />
 
-      <!-- Subject dropdown (loaded from Supabase 'subjects' table) -->
+      <!-- Subject from DB -->
       <label>Subject</label>
       <select id="subject" required>
         <option value="">Loading subjects...</option>
@@ -76,16 +60,19 @@
       <label>Class / Grade</label>
       <select id="classGrade" required>
         <option value="">Select Class / Grade</option>
-        <option value="B.Tech-M.Tech">B.Tech / M.Tech</option>
-        <option value="BSc-MSc">BSc / MSc</option>
-        <option value="LLB-LLM">LLB / LLM</option>
+        <option value="BSc">BSc</option>
+        <option value="MSc">MSc</option>
+        <option value="BTech">BTech</option>
+        <option value="MTech">MTech</option>
+        <option value="LLB">LLB</option>
+        <option value="LLM">LLM</option>
       </select>
 
       <!-- File -->
       <label>Upload PDF / Images</label>
       <input id="fileInput" type="file" accept="application/pdf,image/*" required />
 
-      <!-- Description (optional) -->
+      <!-- Description -->
       <label>Description</label>
       <textarea id="desc" placeholder="Short description..."></textarea>
 
@@ -96,21 +83,21 @@
     <p id="link"></p>
   </section>
 
-  <!-- Supabase JS (v2) -->
+  <!-- Supabase JS v2 (UMD) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.4/dist/umd/supabase.js"></script>
 
   <script>
-    // ✅ NAYA PROJECT DETAILS (tumne jo bheja tha)
+    // ---- Supabase client (tumhara new project) ----
     const supabaseUrl = "https://okewyhiqgdvwipjacoyp.supabase.co";
-    const supabaseAnonKey =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rZXd5aGlxZ2R2d2lwamFjb3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTcxMjcsImV4cCI6MjA3OTIzMzEyN30.SH4dcOOFqM4FWX1UCRTC-ycfrSaCHyul_nTA0yfkwv0";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rZXd5aGlxZ2R2d2lwamFjb3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTcxMjcsImV4cCI6MjA3OTIzMzEyN30.SH4dcOOFqM4FWX1UCRTC-ycfrSaCHyul_nTA0yfkwv0";
 
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    const { createClient } = supabase;
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-    // ---------- LOAD SUBJECTS FROM DB ----------
+    // -------------- STEP 1: Load subjects into dropdown --------------
     async function loadSubjects() {
       const sel = document.getElementById("subject");
-      sel.innerHTML = '<option value="">Loading subjects...</option>';
+      sel.innerHTML = '<option value="">Loading...</option>';
 
       const { data, error } = await supabaseClient
         .from("subjects")
@@ -119,99 +106,123 @@
 
       if (error) {
         console.error("Error loading subjects:", error);
-        sel.innerHTML = '<option value="">Error loading subjects</option>';
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        sel.innerHTML = '<option value="">No subjects found</option>';
+        sel.innerHTML = '<option value="">Failed to load subjects</option>';
         return;
       }
 
       sel.innerHTML = '<option value="">Select Subject</option>';
+
       data.forEach((sub) => {
         const opt = document.createElement("option");
-        opt.value = sub.id;          // store subject id
-        opt.textContent = sub.name;  // show subject name
+        opt.value = sub.id;       // uuid
+        opt.textContent = sub.name;
         sel.appendChild(opt);
       });
     }
 
-    window.addEventListener("DOMContentLoaded", loadSubjects);
+    document.addEventListener("DOMContentLoaded", loadSubjects);
 
-    // ---------- UPLOAD FUNCTION ----------
+    // -------------- STEP 2: Upload file + insert row in notes --------------
     async function uploadFile(e) {
       e.preventDefault();
 
       const title = document.getElementById("title").value.trim();
-      const subjectSelect = document.getElementById("subject");
-      const subjectId = subjectSelect.value;
-      const subjectName =
-        subjectSelect.options[subjectSelect.selectedIndex]?.text || "";
+      const subjectId = document.getElementById("subject").value;
       const classGrade = document.getElementById("classGrade").value;
       const desc = document.getElementById("desc").value.trim();
       const file = document.getElementById("fileInput").files[0];
+
+      const statusEl = document.getElementById("status");
+      const linkEl = document.getElementById("link");
+      statusEl.textContent = "";
+      linkEl.innerHTML = "";
 
       if (!file) {
         alert("Please select a file!");
         return;
       }
-
       if (!subjectId) {
         alert("Please select a subject!");
         return;
       }
-
       if (!classGrade) {
-        alert("Please select class / grade!");
+        alert("Please select class/grade!");
         return;
       }
 
-      document.getElementById("status").innerText = "Uploading...";
+      statusEl.textContent = "Uploading file...";
 
-      // Metadata jo filename mein encode hoga
-      const metadata = {
-        title,
-        subject_id: subjectId,
-        subject_name: subjectName,
-        class_grade: classGrade,
-        desc,
-      };
-      const metaString = encodeURIComponent(JSON.stringify(metadata));
+      // Unique path inside bucket
+      const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+      const filePath = `notes/${Date.now()}_${cleanName}`;
 
-      const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
-      const fileName = Date.now() + "_" + safeName + "__meta__" + metaString;
-
-      // ✅ NEW BUCKET: notes_files
-      const { data, error } = await supabaseClient.storage
+      // 1) Upload to storage bucket: notes_files
+      const { data: storageData, error: storageError } = await supabaseClient
+        .storage
         .from("notes_files")
-        .upload(fileName, file, {
-          contentType: file.type,
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type
         });
 
-      if (error) {
-        console.error(error);
-        document.getElementById("status").innerText = "Upload failed ❌";
+      if (storageError) {
+        console.error("Storage upload error:", storageError);
+        statusEl.textContent = "Upload failed ❌ (storage error)";
         return;
       }
 
-      // Public URL for notes_files bucket
-      const publicUrl =
-        "https://okewyhiqgdvwipjacoyp.supabase.co/storage/v1/object/public/notes_files/" +
-        fileName;
+      // 2) Get public URL
+      const { data: publicUrlData } = supabaseClient
+        .storage
+        .from("notes_files")
+        .getPublicUrl(storageData.path);
 
-      document.getElementById("status").innerText = "Upload Successful ✔✔";
+      const fileUrl = publicUrlData.publicUrl;
 
-      document.getElementById("link").innerHTML =
-        `<br><b>File URL:</b> <a href="${publicUrl}" target="_blank">${publicUrl}</a>
-         <br><b>Title:</b> ${title}
-         <br><b>Subject:</b> ${subjectName}
-         <br><b>Class/Grade:</b> ${classGrade}
-         <br><b>Description:</b> ${desc || "-"} `;
+      statusEl.textContent = "Saving note details...";
+
+      // 3) Insert row into notes table
+      const { error: insertError } = await supabaseClient
+        .from("notes")
+        .insert([
+          {
+            title: title,
+            description: desc,
+            subject_id: subjectId,      // uuid from dropdown
+            class_grade: classGrade,
+            file_url: fileUrl
+            // tags, uploaded_by, uploaded_at -> defaults / null
+          }
+        ]);
+
+      if (insertError) {
+        console.error("Insert error:", insertError);
+        statusEl.textContent = "Upload failed ❌ (database error)";
+        return;
+      }
+
+      statusEl.textContent = "Upload Successful ✔✔";
+
+      linkEl.innerHTML = `
+        <br><b>File URL:</b> <a href="${fileUrl}" target="_blank">${fileUrl}</a>
+        <br><b>Title:</b> ${title}
+        <br><b>Subject:</b> ${document.querySelector("#subject option:checked").textContent}
+        <br><b>Class/Grade:</b> ${classGrade}
+        <br><b>Description:</b> ${desc || "-"}
+      `;
+
+      // Optional: form reset
+      e.target.reset();
+      document.getElementById("subject").selectedIndex = 0;
+      document.getElementById("classGrade").selectedIndex = 0;
     }
   </script>
 </body>
 </html>
+
+
+
 
 
 
