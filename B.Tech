@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Notes</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins,system-ui}
+
+body{
+  background:#f8fafc;
+  color:#0f172a;
+}
+
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:20px;
+}
+
+/* HEADER */
+h1{
+  font-size:26px;
+  font-weight:700;
+  margin-bottom:10px;
+}
+
+p{
+  font-size:14px;
+  color:#64748b;
+  margin-bottom:20px;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+/* BUTTON */
+.btn{
+  background:#eef2ff;
+  padding:16px;
+  border-radius:16px;
+  text-align:center;
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.btn:hover{
+  background:#2563eb;
+  color:#fff;
+}
+
+/* LIST */
+.list{
+  display:none;
+}
+
+.list.active{
+  display:block;
+}
+
+.card{
+  background:#ffffff;
+  padding:16px;
+  border-radius:14px;
+  margin-bottom:14px;
+  box-shadow:0 6px 16px rgba(0,0,0,.06);
+  cursor:pointer;
+}
+
+.card:hover{
+  background:#f1f5f9;
+}
+
+/* BACK */
+.back{
+  margin-bottom:16px;
+  display:inline-block;
+  color:#2563eb;
+  font-weight:600;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- COURSES -->
+  <div id="courses">
+    <h1>Select Course</h1>
+    <p>Choose your program</p>
+
+    <div class="grid">
+      <div class="btn" onclick="openSem('B.Tech')">B.Tech</div>
+      <div class="btn" onclick="openSem('B.Sc')">B.Sc</div>
+      <div class="btn" onclick="openSem('M.Tech')">M.Tech</div>
+      <div class="btn" onclick="openSem('LLB')">LLB</div>
+    </div>
+  </div>
+
+  <!-- SEMESTERS -->
+  <div id="semesters" class="list">
+    <div class="back" onclick="goBack('courses')">← Back</div>
+    <h1 id="courseTitle"></h1>
+    <p>Select Semester</p>
+
+    <div class="grid">
+      <div class="btn" onclick="openSubjects(1)">Semester 1</div>
+      <div class="btn" onclick="openSubjects(2)">Semester 2</div>
+      <div class="btn" onclick="openSubjects(3)">Semester 3</div>
+      <div class="btn" onclick="openSubjects(4)">Semester 4</div>
+      <div class="btn" onclick="openSubjects(5)">Semester 5</div>
+      <div class="btn" onclick="openSubjects(6)">Semester 6</div>
+    </div>
+  </div>
+
+  <!-- SUBJECTS -->
+  <div id="subjects" class="list">
+    <div class="back" onclick="goBack('semesters')">← Back</div>
+    <h1 id="semTitle"></h1>
+    <p>Select Subject</p>
+
+    <div id="subjectList"></div>
+  </div>
+
+  <!-- PDF PAGE -->
+  <div id="pdfs" class="list">
+    <div class="back" onclick="goBack('subjects')">← Back</div>
+    <h1>Notes</h1>
+    <p>Download PDF</p>
+
+    <div class="card">📄 Unit-1 Notes.pdf</div>
+    <div class="card">📄 Unit-2 Notes.pdf</div>
+    <div class="card">📄 Full Book.pdf</div>
+  </div>
+
+</div>
+
+<script>
+let currentCourse = ""
+let currentSem = ""
+
+function openSem(course){
+  currentCourse = course
+  document.getElementById("courses").style.display="none"
+  document.getElementById("semesters").classList.add("active")
+  document.getElementById("courseTitle").innerText = course
+}
+
+function openSubjects(sem){
+  currentSem = sem
+  document.getElementById("semesters").classList.remove("active")
+  document.getElementById("subjects").classList.add("active")
+  document.getElementById("semTitle").innerText = currentCourse+" - Semester "+sem
+
+  document.getElementById("subjectList").innerHTML = `
+    <div class="card" onclick="openPDF()">Mathematics</div>
+    <div class="card" onclick="openPDF()">Physics</div>
+    <div class="card" onclick="openPDF()">Programming</div>
+    <div class="card" onclick="openPDF()">Electrical</div>
+  `
+}
+
+function openPDF(){
+  document.getElementById("subjects").classList.remove("active")
+  document.getElementById("pdfs").classList.add("active")
+}
+
+function goBack(page){
+  document.getElementById("courses").style.display="none"
+  document.getElementById("semesters").classList.remove("active")
+  document.getElementById("subjects").classList.remove("active")
+  document.getElementById("pdfs").classList.remove("active")
+
+  if(page==="courses") document.getElementById("courses").style.display="block"
+  if(page==="semesters") document.getElementById("semesters").classList.add("active")
+  if(page==="subjects") document.getElementById("subjects").classList.add("active")
+}
+</script>
+
+</body>
+</html>
