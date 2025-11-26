@@ -1,83 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>All Notes</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All Notes</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .note-card {
-      background: white;
-      padding: 20px;
-      margin-bottom: 15px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-    .note-card a {
-      color: blue;
-      font-weight: bold;
-    }
-  </style>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f4f6f8;
+  padding:15px;
+}
+h1{text-align:center;margin-bottom:15px}
+
+.filters{
+  display:flex;
+  gap:10px;
+  margin-bottom:12px;
+}
+select,input{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+.section{margin-bottom:30px}
+.section-title{
+  background:#111;
+  color:#fff;
+  padding:12px;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.badge{
+  background:#fff;
+  color:#000;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:14px;
+}
+
+.semester{margin-top:15px}
+.semester h3{margin:0 0 8px}
+
+.note{
+  background:#fff;
+  padding:12px;
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  margin-bottom:10px;
+}
+.note b{font-size:15px}
+.note small{color:#555}
+.note a{
+  display:inline-block;
+  margin-top:5px;
+  color:#007BFF;
+  font-weight:bold;
+  text-decoration:none;
+}
+.note a:hover{text-decoration:underline}
+</style>
 </head>
 
 <body>
 
-  <h1>📚 All Uploaded Notes</h1>
+<h1>📚 All Notes</h1>
 
-  <div id="notesList">Loading...</div>
+<div class="filters">
+  <select id="courseF">
+    <option value="">All Courses</option>
+    <option>B.Tech</option><option>M.Tech</option>
+    <option>B.Sc</option><option>M.Sc</option>
+    <option>LLB</option><option>LLM</option>
+  </select>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <select id="semF">
+    <option value="">All Sem</option>
+    <option>Sem 1</option><option>Sem 2</option><option>Sem 3</option>
+    <option>Sem 4</option><option>Sem 5</option><option>Sem 6</option>
+    <option>Sem 7</option><option>Sem 8</option>
+  </select>
+</div>
 
-  <script>
+<input id="search" placeholder="🔍 Search title / subject">
 
-    const supabaseClient = supabase.createClient(
-      "https://okewyhiqgdvwipjacoyp.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rZXd5aGlxZ2R2d2lwamFjb3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTcxMjcsImV4cCI6MjA3OTIzMzEyN30.SH4dcOOFqM4FWX1UCRTC-ycfrSaCHyul_nTA0yfkwv0"
-    );
+<div id="notesArea">Loading...</div>
 
-    async function loadNotes() {
-      const { data, error } = await supabaseClient
-        .from("notes")
-        .select("*")
-        .order("uploaded_at", { ascending: false });
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = supabase.createClient(
+ "https://okewyhiqgdvwipjacoyp.supabase.co",
+ "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rZXd5aGlxZ2R2d2lwamFjb3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTcxMjcsImV4cCI6MjA3OTIzMzEyN30.SH4dcOOFqM4FWX1UCRTC-ycfrSaCHyul_nTA0yfkwv0"
+);
 
-      if (error) {
-        document.getElementById("notesList").innerHTML = "Error loading notes!";
-        return;
-      }
+let allNotes=[];
 
-      let html = "";
+async function loadNotes(){
+ const {data,error}=await supabaseClient
+  .from("notes")
+  .select("*")
+  .order("uploaded_at",{ascending:false});
 
-      data.forEach(n => {
-        html += `
-          <div class="note-card">
-            <h2>${n.title}</h2>
-            <p><b>Description:</b> ${n.description}</p>
-            <p><b>Class/Grade:</b> ${n.class_grade}</p>
-            <p><a href="${n.file_url}" target="_blank">📄 View PDF</a></p>
-          </div>
-        `;
-      });
+ if(error){notesArea.innerHTML="Error loading notes";return;}
+ allNotes=data;
+ render();
+}
 
-      document.getElementById("notesList").innerHTML = html;
-    }
+function render(){
+ const course=courseF.value;
+ const sem=semF.value;
+ const key=search.value.toLowerCase();
+ notesArea.innerHTML="";
 
-    loadNotes();
+ const grouped={};
 
-  </script>
+ allNotes.forEach(n=>{
+  if(course && n.course!==course) return;
+  if(sem && n.semester!==sem) return;
+  if(key && !(n.title+n.subject).toLowerCase().includes(key)) return;
+
+  if(!grouped[n.course]) grouped[n.course]={};
+  if(!grouped[n.course][n.semester]) grouped[n.course][n.semester]=[];
+  grouped[n.course][n.semester].push(n);
+ });
+
+ for(const c in grouped){
+  let count=0;
+  Object.values(grouped[c]).forEach(v=>count+=v.length);
+
+  let html=`<div class="section">
+    <div class="section-title">${c}<span class="badge">${count}</span></div>`;
+
+  for(const s in grouped[c]){
+   html+=`<div class="semester"><h3>${s}</h3>`;
+   grouped[c][s].forEach(n=>{
+    html+=`
+     <div class="note">
+      <b>${n.title}</b><br>
+      <small>${n.subject}</small><br>
+      <a href="${n.file_url}" target="_blank">📄 View PDF</a>
+     </div>`;
+   });
+   html+=`</div>`;
+  }
+  html+=`</div>`;
+  notesArea.innerHTML+=html;
+ }
+}
+
+courseF.onchange=render;
+semF.onchange=render;
+search.oninput=render;
+
+loadNotes();
+</script>
 
 </body>
 </html>
+
 
 
 
