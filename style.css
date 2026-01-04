@@ -407,6 +407,72 @@ footer{padding:28px;text-align:center;color:#6b7280}
     bottom:auto;
   }
 }
+/* ===== Premium Micro-animations ===== */
+:root{
+  --ease: cubic-bezier(.2,.8,.2,1);
+}
+
+/* Smooth hover lift */
+.cat-card, .feature-card, .course-card, .news-card, .btn-primary, .btn-outline, .float-card{
+  transition: transform .35s var(--ease), box-shadow .35s var(--ease), filter .35s var(--ease);
+}
+.cat-card:hover, .feature-card:hover, .course-card:hover, .news-card:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 18px 50px rgba(10,35,66,0.12);
+}
+
+/* Button pop */
+.btn-primary:hover{
+  transform: translateY(-2px) scale(1.01);
+  filter: saturate(1.05);
+}
+
+/* Navbar link underline anim */
+.navbar nav a{
+  position:relative;
+}
+.navbar nav a::after{
+  content:"";
+  position:absolute;
+  left:0; bottom:-6px;
+  height:3px; width:0%;
+  background:#11b79e;
+  border-radius:10px;
+  transition: width .25s var(--ease);
+}
+.navbar nav a:hover::after{ width:100%; }
+
+/* Hero image gentle float */
+@keyframes floaty{
+  0%,100%{ transform: translateY(0); }
+  50%{ transform: translateY(-8px); }
+}
+.hero-img{ animation: floaty 6s ease-in-out infinite; }
+
+/* Card entrance on first paint */
+@keyframes fadeUp{
+  from{ opacity:0; transform: translateY(16px); }
+  to{ opacity:1; transform: translateY(0); }
+}
+.hero-left, .hero-right, .categories, .features, .courses, .stats, .news, .subscribe{
+  animation: fadeUp .7s var(--ease) both;
+}
+
+/* Delay for nicer feel */
+.hero-right{ animation-delay:.08s; }
+.categories{ animation-delay:.14s; }
+.features{ animation-delay:.20s; }
+.courses{ animation-delay:.26s; }
+.stats{ animation-delay:.32s; }
+.news{ animation-delay:.38s; }
+.subscribe{ animation-delay:.44s; }
+
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+}
+
+
 
 
 
