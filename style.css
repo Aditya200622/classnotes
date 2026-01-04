@@ -349,4 +349,35 @@ footer{padding:28px;text-align:center;color:#6b7280}
   .underline{border-bottom-width:8px}
   .cat-card{font-size:14px}
 }
+/* ===== Patch: HERO image cut fix (mobile) ===== */
+@media (max-width:768px){
+  .hero-right{
+    width:100%;
+    max-width:420px;
+    align-items:center;
+  }
+  .hero-img{
+    width:100%;
+    max-width:420px;
+    height:auto;
+    object-fit:contain; /* full photo visible, no cut */
+  }
+}
+
+/* ===== Patch: Feature images cut fix (mobile) ===== */
+@media (max-width:768px){
+  .feature-card{
+    overflow:visible; /* absolute images cut na hon */
+  }
+  .f-img-1,.f-img-2{
+    position:static;     /* mobile me normal flow */
+    transform:none;
+    display:block;
+    margin:14px auto 0;  /* center */
+    max-width:160px;
+  }
+}
+
+
+
 
