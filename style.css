@@ -377,6 +377,38 @@ footer{padding:28px;text-align:center;color:#6b7280}
     max-width:160px;
   }
 }
+@media (max-width:768px){
+
+  /* Hero image: full visible + no weird cutting */
+  .hero-right{
+    width:100%;
+    max-width:420px;
+    padding:0 10px;
+  }
+
+  .hero-img{
+    width:100%;
+    max-width:420px;
+    border-radius:16px;
+    object-fit:cover;        /* natural look */
+    object-position:center;  /* crop center se */
+    display:block;
+    margin:0 auto;
+  }
+
+  /* Floating card: fully inside screen */
+  .float-card{
+    left:auto;
+    right:auto;
+    width:100%;
+    max-width:360px;
+    margin:12px auto 0;
+    transform:none;          /* translateX issue avoid */
+    bottom:auto;
+  }
+}
+
+
 
 
 
