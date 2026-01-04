@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Upload Your Notes</title>
   <link rel="stylesheet" href="upload.css" />
+
   <style>
     body { font-family: Arial, sans-serif; background:#fafafa; margin:0; }
     .navbar { display:flex; justify-content:space-between; padding:15px 25px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
     nav a, nav button { margin-left:20px; text-decoration:none; font-size:16px; color:#333; }
-    
+
     .upload-section { max-width:550px; margin:70px auto; background:white; padding:30px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.07); }
     h1 { margin-bottom:5px; }
     .subtitle { color:#444; margin-bottom:25px; }
@@ -26,6 +27,7 @@
     .btn-primary:hover { background:#3b5bdb; }
 
     #status { font-size:15px; margin-top:20px; }
+    #link a { color:#4c6ef5; text-decoration:none; font-weight:bold; }
   </style>
 </head>
 
@@ -45,14 +47,13 @@
     <h1>Upload Your Notes 🖊️</h1>
     <p class="subtitle">Share your notes with thousands of students. Fast, easy and free.</p>
 
-    <form class="upload-form" onsubmit="uploadFile(event)">
-      
+    <form class="upload-form" id="uploadForm">
       <label>Title</label>
       <input id="title" type="text" placeholder="Enter title" required />
 
       <label>Subject</label>
       <select id="subject" required>
-        <option value="">Loading subjects...</option>
+        <option value="">Select Subject</option>
       </select>
 
       <label>Class / Grade</label>
@@ -79,34 +80,24 @@
     <p id="link"></p>
   </section>
 
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.4/dist/umd/supabase.js"></script>
-
   <script>
-    const supabaseUrl = "https://okewyhiqgdvwipjacoyp.supabase.co";
-    const supabaseKey =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rZXd5aGlxZ2R2d2lwamFjb3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTcxMjcsImV4cCI6MjA3OTIzMzEyN30.SH4dcOOFqM4FWX1UCRTC-ycfrSaCHyul_nTA0yfkwv0";
+    // Local subject list (Supabase removed)
+    const SUBJECTS = [
+      { id: "eng-physics", name: "Engineering Physics" },
+      { id: "maths-1", name: "Mathematics-I" },
+      { id: "maths-2", name: "Mathematics-II" },
+      { id: "bee", name: "Basic Electrical Engineering" },
+      { id: "chem", name: "Chemistry" },
+      { id: "c-lang", name: "C Programming" },
+      { id: "ipc", name: "Indian Penal Code (IPC)" },
+      { id: "const-law", name: "Constitutional Law" }
+    ];
 
-    const { createClient } = supabase;
-    const supabaseClient = createClient(supabaseUrl, supabaseKey);
-
-    // Load subjects
-    async function loadSubjects() {
+    function loadSubjects() {
       const sel = document.getElementById("subject");
-      sel.innerHTML = '<option value="">Loading...</option>';
-
-      const { data, error } = await supabaseClient
-        .from("subjects")
-        .select("id, name")
-        .order("name");
-
-      if (error) {
-        sel.innerHTML = '<option value="">Failed to load</option>';
-        return;
-      }
-
       sel.innerHTML = '<option value="">Select Subject</option>';
-      data.forEach(sub => {
+
+      SUBJECTS.forEach(sub => {
         const opt = document.createElement("option");
         opt.value = sub.id;
         opt.textContent = sub.name;
@@ -114,86 +105,39 @@
       });
     }
 
-    document.addEventListener("DOMContentLoaded", loadSubjects);
-
-    // Upload File
-    async function uploadFile(e) {
-      e.preventDefault();
+    function uploadFile(event) {
+      event.preventDefault();
 
       const title = document.getElementById("title").value.trim();
-      const subjectId = document.getElementById("subject").value;
+      const subject = document.getElementById("subject").value;
       const classGrade = document.getElementById("classGrade").value;
-      const desc = document.getElementById("desc").value.trim();
       const file = document.getElementById("fileInput").files[0];
+      const desc = document.getElementById("desc").value.trim();
 
-      const statusEl = document.getElementById("status");
-      const linkEl = document.getElementById("link");
+      const status = document.getElementById("status");
+      const link = document.getElementById("link");
+      status.textContent = "";
+      link.innerHTML = "";
 
-      statusEl.textContent = "";
-
-      if (!file || !subjectId || !classGrade) {
-        alert("Please fill all fields!");
+      if (!title || !subject || !classGrade || !file) {
+        status.textContent = "Please fill all required fields.";
         return;
       }
 
-      statusEl.textContent = "Uploading file...";
-
-      const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
-      const filePath = `notes/${Date.now()}_${cleanName}`;
-
-      const { data: storageData, error: storageError } = await supabaseClient
-        .storage
-        .from("notes_files")
-        .upload(filePath, file);
-
-      if (storageError) {
-        statusEl.textContent = "Upload failed ❌";
-        console.error(storageError);
-        return;
-      }
-
-      const { data: publicUrlData } = supabaseClient
-        .storage
-        .from("notes_files")
-        .getPublicUrl(storageData.path);
-
-      const fileUrl = publicUrlData.publicUrl;
-
-      statusEl.textContent = "Saving to database...";
-
-      const { error: insertError } = await supabaseClient
-        .from("notes")
-        .insert([
-          {
-            title,
-            description: desc,
-            subject_id: subjectId,
-            class_grade: classGrade,
-            file_url: fileUrl
-          }
-        ]);
-
-      if (insertError) {
-        statusEl.textContent = "Database error ❌";
-        console.error(insertError);
-        return;
-      }
-
-      statusEl.textContent = "Upload Successful ✔✔";
-
-      linkEl.innerHTML = `
-        <br><b>File URL:</b> <a href="${fileUrl}" target="_blank">${fileUrl}</a>
-        <br><b>Title:</b> ${title}
-        <br><b>Subject:</b> ${document.querySelector("#subject option:checked").textContent}
-        <br><b>Class/Grade:</b> ${classGrade}
-        <br><b>Description:</b> ${desc || "-"}
-      `;
-
-      e.target.reset();
+      // Demo-only: no server upload
+      status.textContent = "Upload feature is currently offline (Supabase removed). Form saved locally for demo.";
+      link.innerHTML = `Selected file: <b>${file.name}</b> | Class: <b>${classGrade}</b>`;
+      // You can later connect any backend here.
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadSubjects();
+      document.getElementById("uploadForm").addEventListener("submit", uploadFile);
+    });
   </script>
 </body>
 </html>
+
 
 
 
